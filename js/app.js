@@ -840,6 +840,27 @@ function clearSession() {
   window.scrollTo({ top: 0 });
 }
 
+/* ================= Changelog ================= */
+function renderChangelog() {
+  const body = $('changelog-body');
+  if (!body) return;
+  fetch('CHANGELOG.md', { cache: 'no-store' })
+    .then((res) => { if (!res.ok) throw new Error('bad status'); return res.text(); })
+    .then((md) => {
+      let html = '', inList = false;
+      const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+      for (const line of md.split('\n')) {
+        if (line.startsWith('## ')) { closeList(); html += '<h4>' + esc(line.slice(3).trim()) + '</h4>'; }
+        else if (line.startsWith('- ')) { if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + esc(line.slice(2).trim()) + '</li>'; }
+        else if (line.trim() === '' || line.startsWith('# ')) { closeList(); }
+        else { closeList(); html += '<p>' + esc(line.trim()) + '</p>'; }
+      }
+      closeList();
+      body.innerHTML = html;
+    })
+    .catch(() => { body.innerHTML = "<p class='muted'>Changelog unavailable.</p>"; });
+}
+
 function wireApp() {
   document.querySelector('.cta').addEventListener('click', (e) => { e.preventDefault(); startWizard(); });
   $('brandHome').addEventListener('click', (e) => { e.preventDefault(); $('wizard').hidden = true; $('landing').hidden = false; window.scrollTo({ top: 0 }); });
@@ -880,6 +901,7 @@ function wireApp() {
   $('printBtn').onclick = () => window.print();
   $('dlReportBtn').onclick = downloadReport;
   $('clearBtn').onclick = clearSession;
+  renderChangelog();
 }
 
 document.addEventListener('DOMContentLoaded', wireApp);
