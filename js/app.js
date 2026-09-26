@@ -608,7 +608,7 @@ function capacityCurveHTML(res, N) {
     '<div class="curve-row"><span class="curve-label">Year ' + y + '</span>' +
     '<div class="curve-track"><div class="curve-fill" data-w="' + widths[y].toFixed(1) + '"></div></div>' +
     '<span class="curve-val">' + fmtTB(t) + '</span></div>').join('');
-  return '<div class="panel"><h3><span class="glyph sm">\u0001F4CA</span>Capacity curve <span class="sub">total raw per year &mdash; retune on the Configure step and watch it move</span></h3>' + rows + '</div>';
+  return '<div class="panel"><h3><span class="glyph sm">📊</span>Capacity curve <span class="sub">total raw per year &mdash; retune on the Configure step and watch it move</span></h3>' + rows + '</div>';
 }
 function poolMetersHTML(res, N) {
   const maxRaw = Math.max.apply(null, res.map((x) => x.years[N].raw).concat([0]));
@@ -624,7 +624,7 @@ function poolMetersHTML(res, N) {
       '<div class="meter-track"><div class="meter-seg blue" data-w="' + seg.blue.toFixed(1) + '"></div><div class="meter-seg red" data-w="' + seg.red.toFixed(1) + '"></div></div>' +
       '<span class="meter-val">' + val + '</span></div>';
   }).join('');
-  return '<div class="panel"><h3><span class="glyph sm">\U0001F39A\uFE0F</span>Pool meters at Year ' + N + ' <span class="sub">blue = covered by what the pool owns today &middot; red = shortfall</span></h3>' + rows + '</div>';
+  return '<div class="panel"><h3><span class="glyph sm">🎚️</span>Pool meters at Year ' + N + ' <span class="sub">blue = covered by what the pool owns today &middot; red = shortfall</span></h3>' + rows + '</div>';
 }
 function animateBars(root) {
   if (!root) return;
@@ -1099,7 +1099,7 @@ function wireProjects() {
       const d = JSON.parse(raw);
       if (validProject(d) && hasDemand(d.state)) {
         applyProject(d);
-        showToast('Restored your last session — <strong>' + esc(d.name || '') + '</strong> &nbsp;·&nbsp; <a id="toastFresh">start fresh</a>', 10000);
+        showToast('Restored your last session — <strong>' + esc(d.name || '') + '</strong> &nbsp;·&nbsp; <a id="toastFresh">start fresh</a>', 5000);
         const f = $('toastFresh');
         if (f) f.onclick = () => { clearSession(); $('projToast').hidden = true; };
       }
