@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Storage Sizer — storage capacity planner for VMware refreshes</title>
 <meta name="description" content="Feed it RVTools data or manual pool numbers and get a year-by-year raw storage plan: reduction, protection, replication, snapshots, and growth — in the browser, with nothing uploaded.">
-<link rel="stylesheet" href="css/styles.css?v=4">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=5">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234f8cff'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>SS</text></svg>">
 </head>
 <body>
@@ -30,11 +33,11 @@
 <main id="landing">
   <section class="hero">
     <div class="hero-glow"></div>
-    <div class="hero-inner">
+    <div class="hero-inner reveal">
       <div class="pill">🔒 100% client-side &mdash; zero data retention</div>
       <h1>Size the storage <span class="accent">before</span> you quote it.</h1>
       <p class="lede">Feed in RVTools data or manual pool numbers, tune reduction, protection, replication, snapshots, and growth per pool — and get a year-by-year raw-capacity plan plus a customer-ready report. 100% in your browser, nothing uploaded.</p>
-      <div class="trust-row">
+      <div class="trust-row reveal">
         <div class="trust"><span class="trust-icon">🛡️</span><div><strong>No upload.</strong><span>Data never leaves your PC</span></div></div>
         <div class="trust"><span class="trust-icon">🧠</span><div><strong>No storage.</strong><span>Nothing saved, ever</span></div></div>
         <div class="trust"><span class="trust-icon">📴</span><div><strong>Works offline.</strong><span>Disconnect after load if you like</span></div></div>
@@ -46,14 +49,15 @@
 
   <section id="how" class="section">
     <div class="wrap">
-      <h2>How it works</h2>
-      <div class="cards3">
+      <div class="eyebrow">Workflow</div>
+      <h2><span class="glyph">⚙️</span>How it works</h2>
+      <div class="cards3 reveal">
         <div class="card"><h3>1️⃣ Load demand</h3><p>Drop an <strong>RVTools export</strong> (.xlsx) and it rolls up provisioned and used storage per cluster, reads datastore totals for validation — or type pool numbers in manually, or try the demo environment.</p></div>
         <div class="card"><h3>2️⃣ Configure storage</h3><p>The tunable mid-step: per-pool demand basis, data-reduction ratio, local protection (mirror / RAID / erasure coding), remote replication, snapshot retention, overhead, and free-space headroom. Growth horizon, compounding or static, set globally with per-pool overrides. Live raw-capacity previews as you tune.</p></div>
         <div class="card"><h3>3️⃣ Get the growth plan</h3><p>Year-by-year raw-capacity projections, per-pool worked math, validation against current usable capacity, SE talking points, and a downloadable HTML briefing report.</p></div>
       </div>
 
-      <h3 class="mt">What it reads from RVTools</h3>
+      <h3 class="mt reveal"><span class="glyph sm">📥</span>What it reads from RVTools</h3>
       <table class="data">
         <thead><tr><th>Tab</th><th>What it unlocks</th></tr></thead>
         <tbody>
@@ -65,7 +69,7 @@
       </table>
       <p class="muted">Same tolerant parser as RVTools Analyzer and Server Sizer — modern and legacy column names both work, missing tabs degrade gracefully. No export handy? Manual entry takes pool-level totals, which is all the math needs.</p>
 
-      <h3 class="mt" id="math">Sizing math, explained</h3>
+      <h3 class="mt reveal" id="math"><span class="glyph sm">🧮</span>Sizing math, explained</h3>
       <p class="muted">For each pool and each year, the chain runs: grow the logical demand, shrink it by data reduction, then multiply back up through every protection layer, overhead, and headroom:</p>
       <p><code>logical[y] = basis × (1+g)<sup>y</sup></code> <span class="muted small">compounding — or</span> <code>basis + y×gTB</code> <span class="muted small">static</span></p>
       <p><code>raw[y] = (logical[y] ÷ reduction) × (1 + snapCopies × snapSize%) × localFactor × (1 + remoteCopies) × (1 + overhead%) ÷ (1 − spare%)</code></p>
@@ -85,7 +89,7 @@
       </table>
       <p class="muted">Every pool in the tool shows this worked chain with your numbers plugged in — today (Year 0) and at the horizon year. The protection layer is where storage quotes are won or lost, so it gets its own explicit step.</p>
 
-      <h3 class="mt">Honest limitations</h3>
+      <h3 class="mt reveal"><span class="glyph sm">⚖️</span>Honest limitations</h3>
       <ul class="muted">
         <li>This is <strong>capacity sizing, not performance sizing</strong>. It doesn't model IOPS, latency, or workload behavior — validate the final spec against performance data.</li>
         <li>Data-reduction ratios are <strong>planning assumptions, not measurements</strong>. Dedupe/compression is workload-dependent — validate with vendor sizing tools before quoting.</li>
@@ -99,18 +103,19 @@
 
   <section id="faq" class="section alt">
     <div class="wrap">
-      <h2>Frequently asked questions</h2>
-      <div class="faq-list">
-        <details><summary>Is my data uploaded anywhere?</summary><p>No. Files are read with the browser's FileReader API and parsed in memory by a vendored copy of SheetJS running in this page; manual entries never leave the form. There is no server and no network request carrying your data — check devtools' network tab, or disconnect after the page loads.</p></details>
-        <details><summary>Is anything stored in my browser?</summary><p>No. Everything lives in the page's JavaScript memory for the session. Nothing goes to localStorage, IndexedDB, or cookies. Hit "Clear session data" or close the tab and it's gone.</p></details>
-        <details><summary>Do I need an RVTools export, or can I type numbers in?</summary><p>Either. The export gives you per-cluster provisioned/used storage automatically, plus datastore totals for validation. Manual entry just needs pool-level totals: VMs, provisioned TB, used TB, and optionally current usable TB — five minutes with the customer's capacity spreadsheet.</p></details>
-        <details><summary>What's a "pool"?</summary><p>From an RVTools export, pools are per-cluster storage demand (datacenter / cluster) — aligned with how Server Sizer groups things. With manual entry you define your own pools, e.g. splitting by tier (flash vs capacity) or workload. One pool, one set of tunables.</p></details>
-        <details><summary>Should I size on "used" or "provisioned"?</summary><p><strong>Used</strong> is actual written data — the honest footprint. <strong>Provisioned</strong> includes thin-provisioned commitments that haven't materialized yet — more conservative, and safer when the estate is thin-heavy with headroom to fill. The tool defaults to used; flip to provisioned when you want the conservative number on the quote.</p></details>
-        <details><summary>What should I use for data reduction?</summary><p>The 1.8× default is a middle-ground planning assumption. The rule of thumb baked into the findings: <strong>mirroring without meaningful reduction is the most expensive way to buy storage</strong> — every 0.5× of reduction improvement is worth real TB at the horizon. Vendor reduction guarantees vary by workload; validate before you quote their number.</p></details>
-        <details><summary>Compounding or static growth?</summary><p>Compounding applies a %/yr rate on the prior year's total — right when growth feeds on itself (organic data growth). Static adds a flat TB/yr — right when you know the number from the backup growth trend or a project pipeline. You can override the rate per pool while keeping the mode.</p></details>
-        <details><summary>What's the difference between overhead and headroom?</summary><p><strong>System overhead</strong> is capacity the array consumes for itself — formatting, metadata, system reserve. <strong>Free-space headroom</strong> is slack you deliberately keep — for rebuilds, snapshot bursts, and not running the array at 100%. The tool treats overhead as a multiplier and headroom as a divisor, which is why small headroom changes move the raw number a lot.</p></details>
-        <details><summary>Can I share the results with my team or the customer?</summary><p>Yes — the Growth plan tab generates a standalone HTML briefing you can download and email. Fully self-contained, no external dependencies, and it contains only the analysis, which you control. Scrub customer names from pool labels first if the report leaves your org.</p></details>
-        <details><summary>Does it do pricing?</summary><p>No — it produces raw TB per pool per year. Your VAR quoting tooling turns that capacity plan into dollars.</p></details>
+      <div class="eyebrow">Questions</div>
+      <h2><span class="glyph">💬</span>Frequently asked questions</h2>
+      <div class="faq-list reveal">
+        <details><summary>🔒 Is my data uploaded anywhere?</summary><p>No. Files are read with the browser's FileReader API and parsed in memory by a vendored copy of SheetJS running in this page; manual entries never leave the form. There is no server and no network request carrying your data — check devtools' network tab, or disconnect after the page loads.</p></details>
+        <details><summary>💾 Is anything stored in my browser?</summary><p>No. Everything lives in the page's JavaScript memory for the session. Nothing goes to localStorage, IndexedDB, or cookies. Hit "Clear session data" or close the tab and it's gone.</p></details>
+        <details><summary>⌨️ Do I need an RVTools export, or can I type numbers in?</summary><p>Either. The export gives you per-cluster provisioned/used storage automatically, plus datastore totals for validation. Manual entry just needs pool-level totals: VMs, provisioned TB, used TB, and optionally current usable TB — five minutes with the customer's capacity spreadsheet.</p></details>
+        <details><summary>🗂️ What's a "pool"?</summary><p>From an RVTools export, pools are per-cluster storage demand (datacenter / cluster) — aligned with how Server Sizer groups things. With manual entry you define your own pools, e.g. splitting by tier (flash vs capacity) or workload. One pool, one set of tunables.</p></details>
+        <details><summary>⚖️ Should I size on "used" or "provisioned"?</summary><p><strong>Used</strong> is actual written data — the honest footprint. <strong>Provisioned</strong> includes thin-provisioned commitments that haven't materialized yet — more conservative, and safer when the estate is thin-heavy with headroom to fill. The tool defaults to used; flip to provisioned when you want the conservative number on the quote.</p></details>
+        <details><summary>🗜️ What should I use for data reduction?</summary><p>The 1.8× default is a middle-ground planning assumption. The rule of thumb baked into the findings: <strong>mirroring without meaningful reduction is the most expensive way to buy storage</strong> — every 0.5× of reduction improvement is worth real TB at the horizon. Vendor reduction guarantees vary by workload; validate before you quote their number.</p></details>
+        <details><summary>📈 Compounding or static growth?</summary><p>Compounding applies a %/yr rate on the prior year's total — right when growth feeds on itself (organic data growth). Static adds a flat TB/yr — right when you know the number from the backup growth trend or a project pipeline. You can override the rate per pool while keeping the mode.</p></details>
+        <details><summary>🧱 What's the difference between overhead and headroom?</summary><p><strong>System overhead</strong> is capacity the array consumes for itself — formatting, metadata, system reserve. <strong>Free-space headroom</strong> is slack you deliberately keep — for rebuilds, snapshot bursts, and not running the array at 100%. The tool treats overhead as a multiplier and headroom as a divisor, which is why small headroom changes move the raw number a lot.</p></details>
+        <details><summary>📤 Can I share the results with my team or the customer?</summary><p>Yes — the Growth plan tab generates a standalone HTML briefing you can download and email. Fully self-contained, no external dependencies, and it contains only the analysis, which you control. Scrub customer names from pool labels first if the report leaves your org.</p></details>
+        <details><summary>💲 Does it do pricing?</summary><p>No — it produces raw TB per pool per year. Your VAR quoting tooling turns that capacity plan into dollars.</p></details>
       </div>
     </div>
   </section>
@@ -118,7 +123,7 @@
   <section id="changelog" class="section">
     <div class="wrap">
       <div class="eyebrow">History</div>
-      <h2>Changelog</h2>
+      <h2><span class="glyph sm">🕘</span>Changelog</h2>
       <details class="changelog-details">
         <summary>What changed and when.</summary>
         <div id="changelog-body"></div>
@@ -227,10 +232,11 @@
       <div class="step-head"><span class="step-num">2</span><h2>Configure storage</h2></div>
       <p class="muted">Set the horizon and growth globally, then tune each pool independently — reduction, protection, replication, snapshots, overhead, headroom. The raw-capacity preview updates live as you tune. Expand a pool to configure it.</p>
       <div class="panel" id="globalGrowth">
-        <h3>Global growth <span class="sub">applies to every pool using "Use global growth"</span></h3>
+        <h3><span class="glyph sm">🌍</span>Global growth <span class="sub">applies to every pool using "Use global growth"</span></h3>
         <div class="cfg-grid">
-          <div class="cfg-field"><label>Growth horizon: <strong data-gl="horizon">3 years</strong></label>
+          <div class="cfg-field"><label class="lbl-row"><span>Growth horizon</span><span class="val-pill" data-gl="horizon">3 years</span></label>
             <input type="range" id="gHorizon" min="1" max="5" step="1" value="3">
+            <div class="slider-scale"><span>1 yr</span><span>3 yr</span><span>5 yr</span></div>
             <div class="cfg-note">Every card preview and the plan table run Year 0 → this year.</div></div>
           <div class="cfg-field"><label>Growth mode</label>
             <div class="seg" id="gMode">
@@ -238,8 +244,9 @@
               <button type="button" data-val="static">Static TB/yr</button>
             </div>
             <div class="cfg-note">Compound: rate applies to the prior year's total. Static: flat TB added per year.</div></div>
-          <div class="cfg-field"><label>Global growth rate: <strong><span id="gValueNum">20</span><span id="gValueUnit">%/yr</span></strong></label>
-            <input type="number" id="gValue" min="0" step="1" value="20">
+          <div class="cfg-field"><label class="lbl-row"><span>Global growth rate</span><span class="val-pill"><span id="gValueNum">20</span><span id="gValueUnit">%/yr</span></span></label>
+            <input type="range" id="gValue" min="0" max="60" step="1" value="20">
+            <div class="slider-scale"><span id="gScaleMin">0</span><span id="gScaleMid">30</span><span id="gScaleMax">60</span></div>
             <div class="cfg-note">Untick "Use global growth" on a card to give that pool its own rate.</div></div>
         </div>
       </div>
@@ -289,6 +296,6 @@
 </footer>
 
 <script src="lib/xlsx.full.min.js"></script>
-<script src="js/app.js?v=3"></script>
+<script src="js/app.js?v=4"></script>
 </body>
 </html>
