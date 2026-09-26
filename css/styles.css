@@ -241,7 +241,7 @@ footer{border-top:1px solid var(--border);padding:26px 0}
 .cfg-field input[type="range"]::-moz-range-track{height:6px;border-radius:999px;background:#232C40}
 .cfg-field input[type="range"]::-moz-range-progress{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--teal))}
 
-.glyph{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#2E7CF6,#2DD4BF);font-size:1.3rem;box-shadow:0 4px 16px rgba(46,124,246,.4);vertical-align:-10px;margin-right:12px}
+.glyph{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#2E7CF6,#2DD4BF);font-size:1.3rem;box-shadow:0 4px 16px rgba(46,124,246,.4);vertical-align:-10px;margin-right:12px}
 .glyph.sm{width:32px;height:32px;border-radius:10px;font-size:1.05rem;vertical-align:-7px;margin-right:9px}
 
 .stat.hero-num{border-color:rgba(59,157,255,.4);box-shadow:0 0 24px rgba(46,124,246,.12)}
