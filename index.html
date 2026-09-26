@@ -39,7 +39,7 @@
       <p class="lede">Feed in RVTools data or manual pool numbers, tune reduction, protection, replication, snapshots, and growth per pool — and get a year-by-year raw-capacity plan plus a customer-ready report. 100% in your browser, nothing uploaded.</p>
       <div class="trust-row reveal">
         <div class="trust"><span class="trust-icon">🛡️</span><div><strong>No upload.</strong><span>Data never leaves your PC</span></div></div>
-        <div class="trust"><span class="trust-icon">🧠</span><div><strong>No storage.</strong><span>Nothing saved, ever</span></div></div>
+        <div class="trust"><span class="trust-icon">🧠</span><div><strong>Stays local.</strong><span>Projects saved in this browser only</span></div></div>
         <div class="trust"><span class="trust-icon">📴</span><div><strong>Works offline.</strong><span>Disconnect after load if you like</span></div></div>
         <div class="trust"><span class="trust-icon">👤</span><div><strong>No account.</strong><span>Just open and size</span></div></div>
       </div>
@@ -107,7 +107,7 @@
       <h2><span class="glyph">💬</span>Frequently asked questions</h2>
       <div class="faq-list reveal">
         <details><summary>🔒 Is my data uploaded anywhere?</summary><p>No. Files are read with the browser's FileReader API and parsed in memory by a vendored copy of SheetJS running in this page; manual entries never leave the form. There is no server and no network request carrying your data — check devtools' network tab, or disconnect after the page loads.</p></details>
-        <details><summary>💾 Is anything stored in my browser?</summary><p>No. Everything lives in the page's JavaScript memory for the session. Nothing goes to localStorage, IndexedDB, or cookies. Hit "Clear session data" or close the tab and it's gone.</p></details>
+        <details><summary>💾 Is anything stored in my browser?</summary><p>Only if you use the Projects feature: named saves and autosave live in this browser's localStorage — 100% local, never uploaded, no cookies or tracking. Your RVTools data itself stays in the page's JavaScript memory; hit "Clear session data" or close the tab and it's gone. <strong>Export</strong> gives you a portable .json you can keep with the engagement files.</p></details>
         <details><summary>⌨️ Do I need an RVTools export, or can I type numbers in?</summary><p>Either. The export gives you per-cluster provisioned/used storage automatically, plus datastore totals for validation. Manual entry just needs pool-level totals: VMs, provisioned TB, used TB, and optionally current usable TB — five minutes with the customer's capacity spreadsheet.</p></details>
         <details><summary>🗂️ What's a "pool"?</summary><p>From an RVTools export, pools are per-cluster storage demand (datacenter / cluster) — aligned with how Server Sizer groups things. With manual entry you define your own pools, e.g. splitting by tier (flash vs capacity) or workload. One pool, one set of tunables.</p></details>
         <details><summary>⚖️ Should I size on "used" or "provisioned"?</summary><p><strong>Used</strong> is actual written data — the honest footprint. <strong>Provisioned</strong> includes thin-provisioned commitments that haven't materialized yet — more conservative, and safer when the estate is thin-heavy with headroom to fill. The tool defaults to used; flip to provisioned when you want the conservative number on the quote.</p></details>
