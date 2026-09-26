@@ -28,48 +28,6 @@ function lcg(seed) {
   return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
 }
 
-/* ---- Physgun-vibe UI helpers (pure, unit-tested) ---- */
-function fillPct(value, min, max) {
-  const lo = parseNum(min), hi = parseNum(max), v = parseNum(value);
-  if (!(hi > lo)) return 0;
-  return Math.min(100, Math.max(0, ((v - lo) / (hi - lo)) * 100));
-}
-function paintSlider(el) {
-  if (!el || el.type !== 'range' || !el.style || !el.style.setProperty) return;
-  el.style.setProperty('--fill', fillPct(el.value, el.min, el.max).toFixed(1) + '%');
-}
-function paintSliders(root) {
-  const q = (root && root.querySelectorAll) ? root : (typeof document !== 'undefined' ? document : null);
-  if (!q) return;
-  q.querySelectorAll('input[type="range"]').forEach(paintSlider);
-}
-/* Relative bar widths (0-100) for the capacity curve. */
-function yearBarWidths(yearTotals) {
-  const mx = Math.max.apply(null, yearTotals.concat([0]));
-  return yearTotals.map((t) => (mx > 0 ? (t / mx) * 100 : 0));
-}
-/* Stacked meter segments (%): blue = plan covered by owned usable, red = overflow. */
-function stackSegs(raw, usable, maxRaw) {
-  if (usable != null && usable > 0 && raw > 0) {
-    const covered = Math.min(raw, usable);
-    return { blue: (covered / raw) * 100, red: (Math.max(raw - usable, 0) / raw) * 100 };
-  }
-  return { blue: maxRaw > 0 ? (raw / maxRaw) * 100 : 0, red: 0 };
-}
-/* Scroll-reveal for landing sections. */
-function wireReveal() {
-  const els = typeof document !== 'undefined' ? document.querySelectorAll('#landing .reveal') : [];
-  const win = typeof window !== 'undefined' ? window : {};
-  if (!('IntersectionObserver' in win) || !els.length) {
-    els.forEach((e) => e.classList.add('in'));
-    return;
-  }
-  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold: 0.12 });
-  els.forEach((e) => io.observe(e));
-}
-
 /* ================= RVTools column aliases (modern + legacy) ================= */
 const COL = {
   vm: {
@@ -398,20 +356,12 @@ function segHTML(seg, opts, cur) {
 
 function renderGlobalGrowth() {
   const G = APP.global;
-  const hz = $('gHorizon');
-  hz.value = G.horizon; paintSlider(hz);
+  $('gHorizon').value = G.horizon;
   document.querySelector('[data-gl="horizon"]').textContent = G.horizon + ' year' + (G.horizon > 1 ? 's' : '');
   $('gMode').querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.val === G.mode));
-  const gv = $('gValue');
-  const gmax = G.mode === 'compound' ? 60 : 50;
-  gv.max = gmax;
-  if (parseNum(G.value) > gmax) G.value = gmax;
-  gv.value = G.value; paintSlider(gv);
+  $('gValue').value = G.value;
   $('gValueNum').textContent = G.value;
   $('gValueUnit').textContent = G.mode === 'compound' ? '%/yr' : 'TB/yr';
-  $('gScaleMin').textContent = '0';
-  $('gScaleMid').textContent = G.mode === 'compound' ? '30' : '25';
-  $('gScaleMax').textContent = gmax;
 }
 
 function renderConfig() {
@@ -419,13 +369,11 @@ function renderConfig() {
   const wrap = $('poolCards');
   wrap.innerHTML = APP.pools.map((p, i) => {
     const cfg = getCfg(p.id);
-    const ownMax = APP.global.mode === 'compound' ? 60 : 50;
-    const ownMid = APP.global.mode === 'compound' ? 30 : 25;
     const protOpts = Object.keys(PROT).map((k) =>
       '<option value="' + k + '"' + (k === cfg.protection ? ' selected' : '') + '>' + esc(PROT[k].label) + ' (' + PROT[k].factor + '×)</option>').join('');
     return '<div class="ccard' + (i === 0 ? ' open' : '') + '" data-id="' + p.id + '">' +
       '<div class="ccard-head">' +
-        '<div><div class="ccard-title"><span class="glyph sm">\u0001F4BE</span>' + esc(p.name) + '</div>' +
+        '<div><div class="ccard-title">' + esc(p.name) + '</div>' +
         '<div class="ccard-sub">' + fmtInt(p.vms) + ' VMs · ' + fmtTB(p.provisionedTB) + ' provisioned · ' + fmtTB(p.usedTB) + ' used' + (p.usableTB != null ? ' · ' + fmtTB(p.usableTB) + ' usable today' : '') + '</div></div>' +
         '<div class="ccard-preview"><div class="hosts"><span data-pv="raw">—</span> <small>TB raw</small></div><div class="binding" data-pv="sub"></div></div>' +
         '<div class="ccard-toggle">▾</div>' +
@@ -434,9 +382,8 @@ function renderConfig() {
         '<div class="cfg-field"><label>Demand basis</label>' +
           segHTML('basis', [['used', 'Used'], ['provisioned', 'Provisioned']], cfg.basis) +
           '<div class="cfg-note">Used = actual written data. Provisioned = allocated incl. thin commitments (conservative).</div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>Data reduction ratio</span><span class="val-pill" data-lb="reduction">' + cfg.reduction.toFixed(1) + '×</span></label>' +
+        '<div class="cfg-field"><label>Data reduction ratio: <strong data-lb="reduction">' + cfg.reduction.toFixed(1) + '×</strong></label>' +
           '<input type="range" data-cfg="reduction" min="1" max="4" step="0.1" value="' + cfg.reduction + '">' +
-          '<div class="slider-scale"><span>1×</span><span>2.5×</span><span>4×</span></div>' +
           '<div class="cfg-note">Dedupe + compression. Logical ÷ ratio = physical.</div></div>' +
         '<div class="cfg-field"><label>Local protection</label>' +
           '<select data-cfg="protection">' + protOpts + '</select>' +
@@ -444,30 +391,23 @@ function renderConfig() {
         '<div class="cfg-field"><label>Remote replication</label>' +
           segHTML('remote', [['none', 'None'], ['async', 'Async copy']], cfg.remote) +
           '<div class="cfg-note">Async adds full replica copies of the protected data.</div></div>' +
-        '<div class="cfg-field" data-remote-only' + (cfg.remote === 'async' ? '' : ' hidden') + '><label class="lbl-row"><span>Replica copies</span><span class="val-pill" data-lb="remoteCopies">' + cfg.remoteCopies + '</span></label>' +
-          '<input type="range" data-cfg="remoteCopies" min="1" max="2" step="1" value="' + cfg.remoteCopies + '">' +
-          '<div class="slider-scale"><span>1</span><span>2</span></div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>Snapshot copies retained</span><span class="val-pill" data-lb="snapCopies">' + cfg.snapCopies + '</span></label>' +
+        '<div class="cfg-field" data-remote-only' + (cfg.remote === 'async' ? '' : ' hidden') + '><label>Replica copies: <strong data-lb="remoteCopies">' + cfg.remoteCopies + '</strong></label>' +
+          '<input type="number" data-cfg="remoteCopies" min="1" max="2" step="1" value="' + cfg.remoteCopies + '"></div>' +
+        '<div class="cfg-field"><label>Snapshot copies retained: <strong data-lb="snapCopies">' + cfg.snapCopies + '</strong></label>' +
           '<input type="range" data-cfg="snapCopies" min="0" max="5" step="1" value="' + cfg.snapCopies + '">' +
-          '<div class="slider-scale"><span>0</span><span>2.5</span><span>5</span></div>' +
           '<div class="cfg-note">How many point-in-time copies you keep around.</div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>Size per snapshot copy</span><span class="val-pill" data-lb="snapPct">' + cfg.snapPct + '%</span></label>' +
+        '<div class="cfg-field"><label>Size per snapshot copy: <strong data-lb="snapPct">' + cfg.snapPct + '%</strong></label>' +
           '<input type="range" data-cfg="snapPct" min="5" max="100" step="5" value="' + cfg.snapPct + '">' +
-          '<div class="slider-scale"><span>5%</span><span>52%</span><span>100%</span></div>' +
           '<div class="cfg-note">Each copy as % of the pool&#39;s reduced base (change rate).</div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>System overhead</span><span class="val-pill" data-lb="overhead">' + cfg.overhead + '%</span></label>' +
+        '<div class="cfg-field"><label>System overhead: <strong data-lb="overhead">' + cfg.overhead + '%</strong></label>' +
           '<input type="range" data-cfg="overhead" min="0" max="30" step="1" value="' + cfg.overhead + '">' +
-          '<div class="slider-scale"><span>0%</span><span>15%</span><span>30%</span></div>' +
           '<div class="cfg-note">Formatting, metadata, system reserve.</div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>Free-space headroom</span><span class="val-pill" data-lb="spare">' + cfg.spare + '%</span></label>' +
+        '<div class="cfg-field"><label>Free-space headroom: <strong data-lb="spare">' + cfg.spare + '%</strong></label>' +
           '<input type="range" data-cfg="spare" min="0" max="40" step="1" value="' + cfg.spare + '">' +
-          '<div class="slider-scale"><span>0%</span><span>20%</span><span>40%</span></div>' +
           '<div class="cfg-note">Slack for rebuilds and snapshot bursts. Keep ≥15% on most arrays.</div></div>' +
-        '<div class="cfg-field"><label class="lbl-row"><span>Growth</span><span class="val-pill" data-lb="ownGrowth">global</span></label>' +
+        '<div class="cfg-field"><label>Growth</label>' +
           '<div class="cfg-row" style="align-items:center"><input type="checkbox" data-cfg="useGlobal" style="width:auto;flex:none"' + (cfg.useGlobal ? ' checked' : '') + '><span class="muted" style="font-size:.85rem">Use global growth</span></div>' +
-          '<div data-own-only' + (cfg.useGlobal ? ' hidden' : '') + ' style="margin-top:8px">' +
-            '<input type="range" data-cfg="ownGrowth" min="0" max="' + ownMax + '" step="1" value="' + cfg.ownGrowth + '">' +
-            '<div class="slider-scale"><span>0</span><span data-own-mid>' + ownMid + '</span><span>' + ownMax + '</span></div></div>' +
+          '<div data-own-only' + (cfg.useGlobal ? ' hidden' : '') + ' style="margin-top:8px"><input type="number" data-cfg="ownGrowth" min="0" step="1" value="' + cfg.ownGrowth + '" placeholder="Pool rate"></div>' +
           '<div class="cfg-note" data-lb="growthNote"></div></div>' +
       '</div>' +
       '<div class="spec-line" data-pv="spec"></div>' +
@@ -494,7 +434,6 @@ function renderConfig() {
       });
     });
   });
-  paintSliders(wrap);
   refreshPreviews();
 }
 
@@ -516,7 +455,6 @@ function onCfgInput(pid, card) {
   cfg.ownGrowth = cfg.useGlobal ? cfg.ownGrowth : (og > 0 || val('ownGrowth') === '0' ? og : cfg.ownGrowth);
   card.querySelectorAll('[data-remote-only]').forEach((el) => { el.hidden = cfg.remote !== 'async'; });
   card.querySelectorAll('[data-own-only]').forEach((el) => { el.hidden = cfg.useGlobal; });
-  card.querySelectorAll('input[type="range"]').forEach(paintSlider);
   refreshPreviews();
   queueAutosave();
 }
@@ -524,16 +462,8 @@ function onCfgInput(pid, card) {
 function onGlobalInput() {
   const G = APP.global;
   G.horizon = Math.min(Math.max(parseInt($('gHorizon').value) || 3, 1), 5);
-  const gmax = G.mode === 'compound' ? 60 : 50;
-  G.value = Math.min(Math.max(parseNum($('gValue').value), 0), gmax);
+  G.value = Math.max(parseNum($('gValue').value), 0);
   renderGlobalGrowth();
-  const omax = G.mode === 'compound' ? 60 : 50;
-  const omid = G.mode === 'compound' ? '30' : '25';
-  document.querySelectorAll('[data-cfg="ownGrowth"]').forEach((el) => {
-    el.max = omax; paintSlider(el);
-    const mid = el.parentElement ? el.parentElement.querySelector('[data-own-mid]') : null;
-    if (mid) mid.textContent = omid;
-  });
   refreshPreviews();
   queueAutosave();
 }
@@ -555,7 +485,6 @@ function refreshPreviews() {
     lbl('overhead', cfg.overhead + '%');
     lbl('spare', cfg.spare + '%');
     lbl('growthNote', 'Effective: ' + growthLabel(effGrowth(cfg, G), G.mode) + ' · horizon ' + G.horizon + ' yr');
-    lbl('ownGrowth', cfg.useGlobal ? 'global' : effGrowth(cfg, G) + (G.mode === 'compound' ? '%/yr' : ' TB/yr'));
     set('raw', fmt1(rN.raw));
     set('sub', 'Year-' + G.horizon + ' · ' + esc(PROT[cfg.protection].label) + (cfg.remote === 'async' ? ' +async×' + cfg.remoteCopies : ''));
     set('spec', '<strong>Year ' + G.horizon + ':</strong> ' + fmtTB(rN.logical) + ' logical → ÷' + cfg.reduction.toFixed(1) + ' reduction → ×' + (PROT[cfg.protection].factor) + ' ' + esc(PROT[cfg.protection].label) +
@@ -600,39 +529,6 @@ function protShort(cfg) {
   return PROT[cfg.protection].label + ' (' + PROT[cfg.protection].factor + '×)' + (cfg.remote === 'async' ? ' + async ×' + cfg.remoteCopies : '');
 }
 
-function capacityCurveHTML(res, N) {
-  const totals = [];
-  for (let y = 0; y <= N; y++) totals.push(res.reduce((a, x) => a + x.years[y].raw, 0));
-  const widths = yearBarWidths(totals);
-  const rows = totals.map((t, y) =>
-    '<div class="curve-row"><span class="curve-label">Year ' + y + '</span>' +
-    '<div class="curve-track"><div class="curve-fill" data-w="' + widths[y].toFixed(1) + '"></div></div>' +
-    '<span class="curve-val">' + fmtTB(t) + '</span></div>').join('');
-  return '<div class="panel"><h3><span class="glyph sm">📊</span>Capacity curve <span class="sub">total raw per year &mdash; retune on the Configure step and watch it move</span></h3>' + rows + '</div>';
-}
-function poolMetersHTML(res, N) {
-  const maxRaw = Math.max.apply(null, res.map((x) => x.years[N].raw).concat([0]));
-  const rows = res.map(({ p, years }) => {
-    const raw = years[N].raw;
-    const seg = stackSegs(raw, p.usableTB, maxRaw);
-    const usableKnown = p.usableTB != null && p.usableTB > 0;
-    const val = usableKnown
-      ? fmtTB(raw) + ' plan vs ' + fmtTB(p.usableTB) + ' owned' +
-        (raw > p.usableTB ? ' <span class="over">(' + fmtTB(raw - p.usableTB) + ' shortfall)</span>' : ' <span class="under">(' + fmtTB(p.usableTB - raw) + ' headroom)</span>')
-      : fmtTB(raw) + ' plan <span class="muted">(no current-usable data)</span>';
-    return '<div class="meter-row"><span class="meter-label" title="' + esc(p.name) + '">' + esc(p.name) + '</span>' +
-      '<div class="meter-track"><div class="meter-seg blue" data-w="' + seg.blue.toFixed(1) + '"></div><div class="meter-seg red" data-w="' + seg.red.toFixed(1) + '"></div></div>' +
-      '<span class="meter-val">' + val + '</span></div>';
-  }).join('');
-  return '<div class="panel"><h3><span class="glyph sm">🎚️</span>Pool meters at Year ' + N + ' <span class="sub">blue = covered by what the pool owns today &middot; red = shortfall</span></h3>' + rows + '</div>';
-}
-function animateBars(root) {
-  if (!root) return;
-  const apply = () => { root.querySelectorAll('[data-w]').forEach((el) => { el.style.width = el.dataset.w + '%'; }); };
-  if (typeof requestAnimationFrame === 'undefined') { apply(); return; }
-  requestAnimationFrame(() => requestAnimationFrame(apply));
-}
-
 function renderPlanTab(res) {
   const G = APP.global;
   const N = G.horizon;
@@ -669,15 +565,14 @@ function renderPlanTab(res) {
   }).join('');
 
   const stats =
-    '<div class="stat hero-num"><div class="v">' + fmtTB(raw0) + '</div><div class="l">Raw needed today</div></div>' +
-    '<div class="stat hero-num"><div class="v">' + fmtTB(rawN) + '</div><div class="l">Raw needed at Year ' + N + '</div></div>' +
+    '<div class="stat"><div class="v blue">' + fmtTB(raw0) + '</div><div class="l">Raw needed today</div></div>' +
+    '<div class="stat"><div class="v purple">' + fmtTB(rawN) + '</div><div class="l">Raw needed at Year ' + N + '</div></div>' +
     '<div class="stat"><div class="v ' + (growthTB > 0 ? 'amber' : 'green') + '">' + (growthTB >= 0 ? '+' : '') + fmtTB(growthTB).replace(' TB', '') + ' TB</div><div class="l">Net growth (raw)</div></div>' +
     '<div class="stat"><div class="v green">' + res.length + '</div><div class="l">Pools sized</div></div>' +
     (v && v.dsCount ? '<div class="stat"><div class="v">' + fmtTB(v.dsCapTB) + '</div><div class="l">Current estate capacity</div></div>' : '');
 
   $('tab-plan').innerHTML =
     '<div class="stat-grid">' + stats + '</div>' +
-    capacityCurveHTML(res, N) + poolMetersHTML(res, N) +
     '<div class="panel"><h3>Year-by-year projection <span class="sub">all pools · ' + (G.mode === 'compound' ? 'compounding' : 'static') + ' growth</span></h3>' +
     '<div class="table-scroll"><table class="data"><thead><tr><th>Year</th><th class="num">Logical</th><th class="num">After reduction</th><th class="num">+ Snapshots</th><th class="num">+ Protection</th><th class="num">Raw needed</th></tr></thead>' +
     '<tbody>' + rows.join('') + '</tbody></table></div>' +
@@ -685,7 +580,6 @@ function renderPlanTab(res) {
     '<div class="panel"><h3>Per-pool summary</h3><div class="table-scroll"><table class="data">' +
     '<thead><tr><th>Pool</th><th class="num">Basis TB</th><th class="num">Reduction</th><th>Protection</th><th class="num">Raw today</th><th class="num">Raw at Year ' + N + '</th></tr></thead>' +
     '<tbody>' + poolRows + '</tbody></table></div></div>';
-  animateBars($('tab-plan'));
 }
 
 function workedChain(p, cfg, G, y, label) {
@@ -1099,7 +993,7 @@ function wireProjects() {
       const d = JSON.parse(raw);
       if (validProject(d) && hasDemand(d.state)) {
         applyProject(d);
-        showToast('Restored your last session — <strong>' + esc(d.name || '') + '</strong> &nbsp;·&nbsp; <a id="toastFresh">start fresh</a>', 5000);
+        showToast('Restored your last session — <strong>' + esc(d.name || '') + '</strong> &nbsp;·&nbsp; <a id="toastFresh">start fresh</a>', 10000);
         const f = $('toastFresh');
         if (f) f.onclick = () => { clearSession(); $('projToast').hidden = true; };
       }
@@ -1109,7 +1003,7 @@ function wireProjects() {
 
 // Export for node unit tests (guarded — undefined in the browser)
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { serializeState, projectEnvelope, validProject, hasDemand, sizePoolYear, fillPct, yearBarWidths, stackSegs };
+  module.exports = { serializeState, projectEnvelope, validProject, hasDemand };
 }
 
 /* ================= Wiring ================= */
@@ -1152,6 +1046,21 @@ function wireApp() {
   document.querySelector('.cta').addEventListener('click', (e) => { e.preventDefault(); startWizard(); });
   $('brandHome').addEventListener('click', (e) => { e.preventDefault(); $('wizard').hidden = true; $('landing').hidden = false; window.scrollTo({ top: 0 }); });
 
+  // Nav anchor links (How it works / Sizing math / FAQ) target sections inside
+  // #landing. If the wizard is showing, the targets aren't rendered and the
+  // browser can't scroll to them — so go back to the landing first, then jump.
+  document.querySelectorAll('.nav-links a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      const target = href.length > 1 && document.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      if ($('landing').hidden) { $('wizard').hidden = true; $('landing').hidden = false; }
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', href);
+    });
+  });
+
   const dz = $('dropzone'), fi = $('fileInput');
   dz.addEventListener('click', () => fi.click());
   dz.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); } });
@@ -1189,7 +1098,6 @@ function wireApp() {
   $('dlReportBtn').onclick = downloadReport;
   $('clearBtn').onclick = clearSession;
   renderChangelog();
-  wireReveal();
 }
 
 if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', wireApp);
