@@ -7,3 +7,6 @@
 - ✨ All key tunables are now glowing sliders with live pill-badge values and min/mid/max scales (step 1 on integer sliders; reduction keeps its 0.1 step). Every output updates in real time.
 - 📊 Growth plan tab: animated capacity-curve bars per year plus per-pool stacked meters at the horizon year (blue = covered by owned usable, red = shortfall); headline totals in big gradient numbers.
 - ❓ FAQ items now carry emoji prefixes.
+
+## 2026-09-27
+- Added top-left app-switcher dropdown on the brand mark: one-click jumps to every app in the suite (full index, this page marked).
