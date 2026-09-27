@@ -1,0 +1,23 @@
+{
+  "name": "Storage Sizer",
+  "short_name": "Storage Sizer",
+  "description": "Storage capacity planner for VMware refreshes.",
+  "id": "https://storage-sizer.scribnet.io/",
+  "start_url": "https://storage-sizer.scribnet.io/",
+  "scope": "https://storage-sizer.scribnet.io/",
+  "display": "standalone",
+  "background_color": "#0a0d13",
+  "theme_color": "#0a0d13",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
