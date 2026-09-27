@@ -10,3 +10,4 @@
 
 ## 2026-09-27
 - Added top-left app-switcher dropdown on the brand mark: one-click jumps to every app in the suite (full index, this page marked).
+- Fixed: RAID overhead factors — RAID-5 4+1 now 1.25x (was 1.33), RAID-6 6+2 now 1.333x (was 1.5).
