@@ -136,8 +136,8 @@ const PROT = {
   none:    { label: 'None',            factor: 1.0 },
   mirror2: { label: '2-way mirror',    factor: 2.0 },
   mirror3: { label: '3-way mirror',    factor: 3.0 },
-  raid5:   { label: 'RAID-5 / 4+1',    factor: 1.33 },
-  raid6:   { label: 'RAID-6 / 6+2',    factor: 1.5 },
+  raid5:   { label: 'RAID-5 / 4+1',    factor: 1.25 },
+  raid6:   { label: 'RAID-6 / 6+2',    factor: 1.333333 },
   ec83:    { label: 'EC 8+3',          factor: 1.375 },
 };
 
