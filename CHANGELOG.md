@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-28
+- TLS certificate provisioned for the `storage-sizer.scribnet.io` custom domain (GitHub's stuck DNS check was reset 2026-09-28); HTTPS is now enforced on the site. App-switcher menu links switched from legacy `scribnetai.github.io` URLs to direct `https://<app>.scribnet.io` URLs for all 10 apps (footer/launcher links updated likewise). This entry also covers the net-zero CNAME delete/re-add commits from the DNS-check reset, which carried no changelog entries. Touched: index.html, js/app-switcher.js.
+
+
 ## 2026-09-26
 - Added 💾 Projects: named saves in this browser, portable JSON export/import, and automatic session restore (your last session reloads on revisit). Saves capture pools, per-pool configs, and global growth settings — nothing uploaded.
 - Added: this changelog section, rendered from CHANGELOG.md.
