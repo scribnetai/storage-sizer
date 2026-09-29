@@ -6,7 +6,7 @@ snapshots, overhead, headroom, and growth per pool — and get a
 year-by-year raw-capacity plan, per-pool worked math, SE talking points,
 and a customer-ready HTML report.
 
-**Live:** https://scribnetai.github.io/storage-sizer/
+**Live:** https://storage-sizer.scribnet.io/
 
 ## How it works
 
