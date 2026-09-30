@@ -32,3 +32,8 @@
 ## 2026-09-27
 - Added top-left app-switcher dropdown on the brand mark: one-click jumps to every app in the suite (full index, this page marked).
 - Fixed: RAID overhead factors — RAID-5 4+1 now 1.25x (was 1.33), RAID-6 6+2 now 1.333x (was 1.5).
+
+## 2026-09-29 — Prompts removed from app-switcher dropdown
+
+- Removed the Prompts entry from the in-app dropdown menu so it lists only the SE-job apps (plus the scribnet.io home link). The prompts page itself is untouched.
+
